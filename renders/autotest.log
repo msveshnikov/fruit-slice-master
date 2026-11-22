@@ -1,6 +1,6 @@
 start
-finish level win=true reason= score=150 stars=3 drops=0
-ok   bot wins level 1 (score 150)
+finish level win=true reason= score=145 stars=3 drops=0
+ok   bot wins level 1 (score 145)
 ok   level 1 recorded stars 3
 finish level win=false reason=lose_bomb score=0 stars=0 drops=0
 ok   slicing a bomb loses the level
@@ -11,7 +11,7 @@ ok   pomegranate counts 10 hits
 ok   4-fruit swipe makes a combo (4)
 finish classic win=false reason=game_over score=0 stars=0 drops=3
 ok   classic ends after 3 drops
-finish level win=true reason= score=305 stars=3 drops=0
-ok   bot beats the world-1 boss (score 305)
+finish level win=true reason= score=345 stars=3 drops=0
+ok   bot beats the world-1 boss (score 345)
 ok   pause stops the game
 AUTOTEST DONE fails=0

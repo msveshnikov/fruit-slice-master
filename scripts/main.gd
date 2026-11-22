@@ -211,6 +211,14 @@ func _icon(kind: String, d := 64.0) -> TextureRect:
 	return t
 
 
+## Text followed by a drawn star (the fonts have no ★ glyph, and the web build has no fallback font).
+func _star_label(text: String, size: int, color: Color) -> HBoxContainer:
+	var h := _hbox(6)
+	h.add_child(UiKit.label(text, size, color, maxi(5, size / 5)))
+	h.add_child(UiKit.Star.new(size * 0.95, true))
+	return h
+
+
 func _logo(size := 1.0) -> VBoxContainer:
 	var v := _vbox(-34)
 	var a := UiKit.label(Game.tr_("title1"), int(104 * size), Color(1.0, 0.86, 0.3), 22, true)
@@ -284,7 +292,7 @@ func show_title() -> void:
 		Game.save_game())
 	row.add_child(snd)
 	v.add_child(row)
-	var stars := UiKit.label(Game.tr_("stars_total") % Game.total_stars() + "  ★", 34, Color(1, 0.9, 0.5), 8)
+	var stars := _star_label(Game.tr_("stars_total") % Game.total_stars(), 34, Color(1, 0.9, 0.5))
 	v.add_child(stars)
 	screen.add_child(_margin(v, 30, 40, 30, 40))
 	UiKit.pop_in(logo, 0.05, 0.6)
@@ -366,7 +374,7 @@ func show_levels(w: int) -> void:
 	var got := 0
 	for i in Game.LEVELS_PER_WORLD:
 		got += Game.stars_of(world_view * Game.LEVELS_PER_WORLD + i)
-	tv.add_child(UiKit.label("%d / %d ★" % [got, Game.LEVELS_PER_WORLD * 3], 30, Color(1, 0.85, 0.35), 8))
+	tv.add_child(_star_label("%d / %d" % [got, Game.LEVELS_PER_WORLD * 3], 30, Color(1, 0.85, 0.35)))
 	head.add_child(tv)
 	var nxt := UiKit.IconButton.new("next", W.color, 92)
 	var first_next := (world_view + 1) * Game.LEVELS_PER_WORLD
@@ -436,7 +444,7 @@ func show_blades() -> void:
 	_clear_screen()
 	var v := _vbox(16)
 	v.add_child(UiKit.label(Game.tr_("blades"), 80, Color(1, 0.85, 0.35), 18, true))
-	v.add_child(UiKit.label(Game.tr_("stars_total") % Game.total_stars() + " ★", 32, Color(1, 0.9, 0.5), 8))
+	v.add_child(_star_label(Game.tr_("stars_total") % Game.total_stars(), 32, Color(1, 0.9, 0.5)))
 	var grid := GridContainer.new()
 	grid.columns = 4 if is_landscape() else 2
 	grid.add_theme_constant_override("h_separation", 16)
@@ -457,7 +465,10 @@ func show_blades() -> void:
 		bv.add_child(_swoosh(b, open))
 		bv.add_child(UiKit.label(Game.tr_("blade_" + b.id), 34, Color.WHITE if open else Color(0.7, 0.65, 0.75), 8))
 		var sub := Game.tr_("selected") if sel else (Game.tr_("select") if open else Game.tr_("locked") % int(b.stars))
-		bv.add_child(UiKit.label(sub, 22, Color(1, 0.92, 0.6) if open else Color(0.75, 0.7, 0.8), 5))
+		if open:
+			bv.add_child(UiKit.label(sub, 22, Color(1, 0.92, 0.6), 5))
+		else:
+			bv.add_child(_star_label(sub, 22, Color(0.75, 0.7, 0.8)))
 		btn.add_child(bv)
 		btn.disabled = not open
 		var id: String = b.id
@@ -1162,6 +1173,8 @@ func _power_pill(kind: String) -> void:
 		if c.get_meta("kind") == kind:
 			return
 	var p := UiKit.pill(30)
+	(p.get_node("L") as Label).autowrap_mode = TextServer.AUTOWRAP_OFF
+	p.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
 	p.set_meta("kind", kind)
 	power_box.add_child(p)
 	UiKit.pop_in(p)
@@ -1178,11 +1191,12 @@ func _bump(l: Control) -> void:
 
 func _toast(text: String, dur: float) -> void:
 	var p := UiKit.pill(36)
-	(p.get_node("L") as Label).text = text
-	p.set_anchors_preset(Control.PRESET_CENTER)
+	var lb := p.get_node("L") as Label
+	lb.text = text
+	lb.autowrap_mode = TextServer.AUTOWRAP_OFF
 	popup_layer.add_child(p)
-	p.position = Vector2(vs().x * 0.5 - 220, vs().y * 0.62)
-	p.custom_minimum_size = Vector2(440, 0)
+	p.reset_size()
+	p.position = Vector2((vs().x - p.size.x) * 0.5, vs().y * 0.64)
 	UiKit.pop_in(p)
 	var t := p.create_tween()
 	t.tween_interval(dur)
@@ -1275,6 +1289,9 @@ func _play_level_bot(n: int, timeout: float, shot := "") -> bool:
 	arena.bot = true
 	arena.bot_miss = 0.0
 	_tap_start()
+	if n == 0:
+		await _wait(1.2)
+		await _shot("06b_tutorial")
 	var t := 0.0
 	var shot_done := false
 	while not ended and t < timeout:

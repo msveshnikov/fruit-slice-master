@@ -26,7 +26,7 @@
 - **Sounds**: the old game's own sword/power-up sounds are reused; whoosh/squish/launch/fuse/freeze/miss/thump are
   synthesized by `tools/make_sfx.py`; the rest are CC0 packs already used in the sibling games.
 - **Analytics**: the Web build keeps the old game's Google Analytics tag (G-L4KLPWXQ75) for continuity.
-- **Android**: package `com.maxsoft.fruit` (same as the Cordova app), version 2.0.0 / code 20000 (old was 17002),
+- **Android**: package `com.maxsoft.fruit` (same as the Cordova app), version 2.0.1 / code 20001 (old was 17002),
   signed with `~/.android/debug.keystore` like the other remakes.
 - **Landscape**: the UI is designed for 720×1280 portrait; on wide windows `content_scale_factor` scales it up
   (×0.95 of the aspect, max 1.7), the 3D view simply gets wider.

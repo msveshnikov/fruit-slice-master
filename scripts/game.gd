@@ -272,7 +272,7 @@ const T := {
 	"yes": ["Yes", "Да"],
 	"no": ["No", "Нет"],
 	"close": ["Close", "Закрыть"],
-	"locked": ["Collect %d ★", "Собери %d ★"],
+	"locked": ["Collect %d", "Собери %d"],
 	"selected": ["Selected", "Выбран"],
 	"select": ["Select", "Выбрать"],
 	"stars_total": ["Stars: %d", "Звёзды: %d"],

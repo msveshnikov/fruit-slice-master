@@ -569,6 +569,7 @@ func _kill_boss(dir: Vector2) -> void:
 func _process(delta: float) -> void:
 	if paused:
 		return
+	delta = minf(delta, 0.05)   # lag spikes / background tabs: never teleport fruit past the blade
 	var real := delta
 	if slowmo_t > 0.0:
 		slowmo_t -= real
