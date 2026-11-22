@@ -2,7 +2,7 @@
 
 A juicy 3D fruit-slicing arcade game made with Godot 4 and Blender.
 
-**Play in the browser:** https://maxims.top/fruit/ · **Downloads:** [Windows .exe](https://github.com/msveshnikov/fruit-slice-master/releases/latest/download/FruitSliceMaster.exe) · [Android .apk](https://github.com/msveshnikov/fruit-slice-master/releases/latest/download/FruitSliceMaster.apk)
+**Play in the browser:** https://maxims.top/fruit/ · **Google Play:** https://play.google.com/store/apps/details?id=com.maxsoft.fruit · **Trailer:** https://youtu.be/fqI1H9Syqaw · **Downloads:** [Windows .exe](https://github.com/msveshnikov/fruit-slice-master/releases/latest/download/FruitSliceMaster.exe) · [Android .apk](https://github.com/msveshnikov/fruit-slice-master/releases/latest/download/FruitSliceMaster.apk)
 
 - Swipe to slice glossy 3D fruit — every fruit splits into two halves with a painted cut face, juice and splats.
 - **6 painted worlds × 20 levels**: Bamboo Garden, Sunset Lagoon, Lantern Market, Frost Peak, Volcano Forge, Sky Garden.
