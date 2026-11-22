@@ -1,0 +1,223 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    touch-action: none;
+    user-select: none;
+}
+
+body {
+    background: url('board.jpg') no-repeat center center fixed;
+    background-size: cover;
+    overflow: hidden;
+    font-family: 'Arial', sans-serif;
+    transition: background-image 0.5s ease;
+}
+
+#gameCanvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+}
+
+.reward-popup,
+.achievement-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(0, 0, 0, 0.8);
+    padding: 20px;
+    border-radius: 10px;
+    color: white;
+    text-align: center;
+    z-index: 1000;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.achievement-popup {
+    animation:
+        slideIn 0.5s ease-out,
+        fadeOut 0.5s ease-in 2.5s forwards;
+}
+
+@keyframes slideIn {
+    from {
+        transform: translate(-50%, -200%);
+    }
+    to {
+        transform: translate(-50%, -50%);
+    }
+}
+
+@keyframes fadeOut {
+    to {
+        opacity: 0;
+    }
+}
+
+.reward-popup button {
+    margin-top: 10px;
+    padding: 10px 20px;
+    background: #e74c3c;
+    border: none;
+    border-radius: 5px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.reward-popup button:hover {
+    transform: scale(1.05);
+}
+
+#menu {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+    color: white;
+    z-index: 100;
+}
+
+#startBtn,
+#zenModeBtn {
+    padding: 15px 40px;
+    font-size: 24px;
+    color: white;
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    margin: 10px;
+    box-shadow: 0 4px 0 #c0392b;
+    transition: all 0.2s;
+}
+
+#startBtn {
+    background: #e74c3c;
+    box-shadow: 0 4px 0 #c0392b;
+}
+
+#zenModeBtn {
+    background: #3498db;
+    box-shadow: 0 4px 0 #2980b9;
+}
+
+.btn:active {
+    transform: translateY(4px);
+    box-shadow: none;
+}
+
+#score,
+#combo,
+#timer {
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    z-index: 50;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+#score {
+    top: 20px;
+    right: 20px;
+}
+#combo {
+    top: 60px;
+    right: 20px;
+}
+#timer {
+    top: 20px;
+    left: 20px;
+}
+
+.game-title {
+    font-size: 48px;
+    color: #e74c3c;
+    text-shadow: 6px 6px 6px rgba(0, 0, 0, 0.8);
+    margin-bottom: 20px;
+    font-weight: bold;
+}
+
+.score-popup {
+    position: absolute;
+    color: white;
+    font-size: 24px;
+    pointer-events: none;
+    animation: floatUp 1s ease-out forwards;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+    font-weight: bold;
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-100px);
+        opacity: 0;
+    }
+}
+
+.instructions {
+    color: white;
+    font-size: 18px;
+    margin-bottom: 20px;
+    line-height: 1.5;
+}
+
+.seasonal-fruit {
+    font-size: 64px;
+    margin: 20px 0;
+    animation: bounce 2s infinite;
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.5));
+}
+
+#topScores {
+    color: white;
+    font-size: 18px;
+    margin-top: 20px;
+    line-height: 1.5;
+}
+
+@keyframes bounce {
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-20px);
+    }
+}
+
+.powerup {
+    position: absolute;
+    color: white;
+    font-size: 18px;
+    padding: 5px 10px;
+    border-radius: 15px;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 50;
+    animation: fadeIn 0.3s ease-in;
+}
+
+#powerups {
+    position: absolute;
+    left: 20px;
+    bottom: 30px;
+    z-index: 50;
+}
+
+#achievements {
+    position: absolute;
+    right: 20px;
+    top: 100px;
+    color: white;
+    font-size: 16px;
+    z-index: 50;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}

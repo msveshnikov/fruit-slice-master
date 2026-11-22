@@ -1,0 +1,15 @@
+Version 1.0.3
+• Added exciting combo system for higher scores
+• New score penalty system (-50 points for missed fruits)
+• Enhanced scoring mechanics for more engaging gameplay
+• Various performance improvements and bug fixes
+
+Version 1.0.0
+• Initial release
+• Introduced 8 different fruit types
+• Implemented basic slicing mechanics
+• Added particle effects and animations
+• Integrated scoring system
+• Implemented sound effects
+
+Stay tuned for future updates with new features and improvements!

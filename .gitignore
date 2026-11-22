@@ -1,0 +1,10 @@
+.godot/
+build/
+renders/game/
+concept/raw/
+blender/tex/
+legacy_cordova/platforms/
+legacy_cordova/node_modules/
+legacy_cordova/server/node_modules/
+legacy_cordova/signing*
+*.tmp

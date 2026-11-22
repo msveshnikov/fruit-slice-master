@@ -1,0 +1,33 @@
+{
+    "name": "fruit-slice-master-server",
+    "version": "1.0.5",
+    "type": "module",
+    "description": "Express backend for Fruit Slice Master highscores",
+    "main": "fruit.js",
+    "scripts": {
+        "start": "node fruit.js"
+    },
+    "dependencies": {
+        "cors": "^2.8.5",
+        "express": "^4.18.2"
+    },
+    "devDependencies": {
+        "nodemon": "^3.0.2"
+    },
+    "keywords": [
+        "fruit-slice",
+        "game",
+        "highscores",
+        "express",
+        "backend"
+    ],
+    "author": "AutoCode",
+    "license": "MIT",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/msveshnikov/fruitninja"
+    },
+    "engines": {
+        "node": ">=14.0.0"
+    }
+}
