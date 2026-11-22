@@ -11,6 +11,8 @@ Remake of the old HTML/Cordova game (kept untouched in `legacy_cordova/`); desig
 |---|---|
 | Project (Godot 4.7, GL Compatibility) | `C:\My-progs\Godot\fruitninja` |
 | Live web build | https://maxims.top/fruit/ (server folder `ubuntu@severance.lol:/var/www/maxims/fruit/`) |
+| GitHub (public) | https://github.com/msveshnikov/fruit-slice-master (remote `origin`, branch `master`); release v2.0.1 with `FruitSliceMaster.exe` + `FruitSliceMaster.apk` (`releases/latest/download/...` is linked from maxims.top). The old Cordova repo `msveshnikov/fruitninja` is untouched. |
+| maxims.top portal card | source `C:\My-progs\Godot\maxims\index.html` + `img/fruit.jpg` (from `-- --cardshot 4` at `--resolution 1100x619`, frame `renders/card4/land_card_5.png`) |
 | Android APK | https://maxims.top/fruit/FruitSliceMaster.apk — package `com.maxsoft.fruit` (same as the Cordova app), signed with `~/.android/debug.keystore` via `.godot/export_credentials.cfg` (not in git) |
 | Old Cordova PWA keystore | `~/.android/fruit-cordova.keystore` + `.txt` (never commit) |
 | Godot exe | `C:\Users\msves\OneDrive\Рабочий стол\Godot_v4.7.2-stable_win64.exe` |
@@ -68,3 +70,5 @@ scp -o BatchMode=yes build/web/* build/android/FruitSliceMaster.apk ubuntu@sever
 curl -sI https://maxims.top/fruit/index.pck
 ```
 Bump `version/code` in the Android preset for every APK that must install over an older one.
+
+GitHub release (milestones): `"/c/Program Files/GitHub CLI/gh.exe" release create vX.Y.Z build/windows/FruitSliceMaster.exe build/android/FruitSliceMaster.apk --target master --title "Fruit Slice Master X.Y.Z" --notes-file notes.md` — the exe must stay a bare asset with exactly that name (the portal links to it).
