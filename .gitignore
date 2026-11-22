@@ -8,3 +8,7 @@ legacy_cordova/node_modules/
 legacy_cordova/server/node_modules/
 legacy_cordova/signing*
 *.tmp
+renders/video/
+renders/play/raw/
+renders/card*/
+override.cfg

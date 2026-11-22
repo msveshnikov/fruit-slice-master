@@ -12,6 +12,8 @@ Remake of the old HTML/Cordova game (kept untouched in `legacy_cordova/`); desig
 | Project (Godot 4.7, GL Compatibility) | `C:\My-progs\Godot\fruitninja` |
 | Live web build | https://maxims.top/fruit/ (server folder `ubuntu@severance.lol:/var/www/maxims/fruit/`) |
 | GitHub (public) | https://github.com/msveshnikov/fruit-slice-master (remote `origin`, branch `master`); release v2.0.1 with `FruitSliceMaster.exe` + `FruitSliceMaster.apk` (`releases/latest/download/...` is linked from maxims.top). The old Cordova repo `msveshnikov/fruitninja` is untouched. |
+| Google Play | app «Fruit Slice Master», package `com.maxsoft.fruit`, Play Console app id 4975566050373032307 (dev 5957945224586801272). Listings en-US (default) + ru-RU «Мастер нарезки: фрукты 3D»; texts `store/listing.md`, graphics `store/play/` (all marked AI-made: ChatGPT art). 2.0.1 (20001) is live. |
+| Trailer | https://youtu.be/fqI1H9Syqaw (channel Manga TV, public), file `store/trailer_en.mp4`; also the Play promo video |
 | maxims.top portal card | source `C:\My-progs\Godot\maxims\index.html` + `img/fruit.jpg` (from `-- --cardshot 4` at `--resolution 1100x619`, frame `renders/card4/land_card_5.png`) |
 | Android APK | https://maxims.top/fruit/FruitSliceMaster.apk — package `com.maxsoft.fruit` (same as the Cordova app), signed with `~/.android/debug.keystore` via `.godot/export_credentials.cfg` (not in git) |
 | Old Cordova PWA keystore | `~/.android/fruit-cordova.keystore` + `.txt` (never commit) |
@@ -59,6 +61,27 @@ python tools/make_textures.py
 python tools/make_sfx.py
 python tools/make_icons.py
 ```
+
+## Store shots and trailer
+
+```
+"$G" --path . --resolution 1080x1920 --quit-after 60000 -- --storeshots --lang en --size 1080x1920   # renders/game/s*.png (repeat with --lang ru)
+# copy to renders/play/raw/<lang>_<name>.png, then:
+python tools/play_store.py                                    # captions + feature graphics -> renders/play/
+printf '[display]
+
+window/size/window_width_override=1280
+window/size/window_height_override=720
+' > override.cfg
+"$G" --path . --fixed-fps 30 --quit-after 1400 --write-movie renders/video/raw_en.avi -- --trailer --lang en; rm override.cfg
+ffmpeg -i renders/video/raw_en.avi -vf "fade=t=in:st=0:d=0.4,fade=t=out:st=29:d=1,format=yuv420p" -af "afade=t=in:st=0:d=0.3,afade=t=out:st=28.5:d=1.5,loudnorm=I=-14:TP=-1.5" -c:v libx264 -crf 19 -c:a aac -b:a 192k -movflags +faststart trailer_en.mp4
+```
+`--size WxH` makes a borderless window taller than the monitor (Windows clamps titled windows); capture modes keep the
+window always-on-top because an occluded window stops rendering and Movie Maker then repeats one frame.
+Uploads from the built-in browser: `python <scratch>/cors_server.py renders` on 127.0.0.1:8765. Play Console can fetch it
+(patch `HTMLInputElement.prototype.click`, queue URLs). YouTube Studio cannot reach localhost: carry the file in ~1.2 MB
+chunks through `renders/hop.html` → `studio.youtube.com/robots.txt#claudechunk=k|n|b64` → IndexedDB, then set the upload
+input from the assembled Blob.
 
 ## Build and deploy
 

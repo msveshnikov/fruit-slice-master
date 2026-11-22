@@ -32,6 +32,8 @@ var tex := {}
 var fruits: Array = []    # live Fruit nodes
 var pieces: Array = []    # flying halves
 var splats: Array = []
+var popups: Array = []
+var combo_popup: Label3D = null
 var rng := RandomNumberGenerator.new()
 
 # spawning
@@ -49,6 +51,7 @@ var demo := false         # title screen: a ghost blade slices everything
 var bot := false          # autotest: the ghost blade plays the level (avoids bombs)
 var bot_miss := 0.0       # chance the bot ignores a fruit (to test drops)
 var paused := false
+var minimal := false       # only big popups (combo, power-ups) for store shots / trailer
 var quiet := false         # no score popups (portal / store shots)
 
 # blade / strokes
@@ -298,10 +301,11 @@ func clear_all() -> void:
 			f.queue_free()
 	fruits.clear()
 	pieces.clear()
-	for s in splats:
+	for s in splats + popups:
 		if is_instance_valid(s):
 			s.queue_free()
 	splats.clear()
+	popups.clear()
 	boss = null
 	freeze_t = 0.0
 	double_t = 0.0
@@ -989,9 +993,9 @@ func _smoke(pos: Vector3) -> void:
 		t.chain().tween_callback(s.queue_free)
 
 
-func _popup(text: String, pos: Vector3, color: Color, size := 1.0) -> void:
-	if demo or quiet:
-		return
+func _popup(text: String, pos: Vector3, color: Color, size := 1.0) -> Label3D:
+	if demo or quiet or (minimal and size < 1.0):
+		return null
 	var l := Label3D.new()
 	l.text = text
 	l.font = UiKit.font_title
@@ -1016,6 +1020,8 @@ func _popup(text: String, pos: Vector3, color: Color, size := 1.0) -> void:
 		lim = 0.0
 	l.position = Vector3(clampf(pos.x, -lim, lim), clampf(pos.y, -half_h + 0.8, half_h - 1.6), 2.0)
 	add_child(l)
+	popups.append(l)
+	l.tree_exited.connect(func(): popups.erase(l))
 	l.scale = Vector3.ONE * 0.3
 	var t := l.create_tween()
 	t.tween_property(l, "scale", Vector3.ONE, 0.2).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
@@ -1023,6 +1029,7 @@ func _popup(text: String, pos: Vector3, color: Color, size := 1.0) -> void:
 	t.tween_property(l, "modulate:a", 0.0, 0.3)
 	t.parallel().tween_property(l, "outline_modulate:a", 0.0, 0.3)
 	t.tween_callback(l.queue_free)
+	return l
 
 
 # ------------------------------------------------------------------ ghost blade (title demo + autotest bot)

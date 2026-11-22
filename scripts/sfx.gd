@@ -115,7 +115,12 @@ var track := ""
 
 
 ## Switches the soundtrack (menus + worlds 1/3/4: chipnese, worlds 2/5/6: tropical, bosses: swords).
+var locked_track := ""   # trailer recording keeps one track
+
+
 func set_track(name: String) -> void:
+	if locked_track != "":
+		name = locked_track
 	if name == track or not TRACKS.has(name):
 		return
 	var path: String = A + TRACKS[name]

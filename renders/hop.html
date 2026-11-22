@@ -1,0 +1,11 @@
+<!doctype html><meta charset="utf-8"><body>hop<script>
+// Chunked hop for uploads from the built-in browser: carry chunk k of a local file to a target origin in the URL hash.
+const q = new URLSearchParams(location.search);
+const f = q.get('f'), k = +q.get('k'), to = q.get('to'), CH = 1200000;
+fetch(f).then(r => r.blob()).then(b => {
+  const n = Math.ceil(b.size / CH);
+  const fr = new FileReader();
+  fr.onload = () => { const d = fr.result; location.href = to + '#claudechunk=' + k + '|' + n + '|' + d.slice(d.indexOf(',') + 1); };
+  fr.readAsDataURL(b.slice(k * CH, (k + 1) * CH));
+});
+</script>

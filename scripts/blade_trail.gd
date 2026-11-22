@@ -61,7 +61,7 @@ func begin(p: Vector2) -> void:
 
 
 func add(p: Vector2) -> void:
-	if not active:
+	if not active or points.is_empty():
 		begin(p)
 		return
 	var last: Vector2 = points[-1].p
@@ -123,7 +123,7 @@ func _ribbon(width: float, col_head: Color, col_tail: Color) -> void:
 	if Geometry2D.triangulate_polygon(poly).is_empty():
 		# self-intersecting: draw per segment quads
 		for i in n - 1:
-			draw_polygon(PackedVector2Array([left[i], left[i + 1], right[i + 1], right[i]]), PackedColorArray([cols[i], cols[i + 1], cols[i + 1], cols[i]]))
+			draw_primitive(PackedVector2Array([left[i], left[i + 1], right[i + 1], right[i]]), PackedColorArray([cols[i], cols[i + 1], cols[i + 1], cols[i]]), PackedVector2Array())
 	else:
 		draw_polygon(poly, pc)
 	draw_circle(points[-1].p, width * 0.5, cols[-1])

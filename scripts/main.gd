@@ -96,6 +96,10 @@ func _ready() -> void:
 		_autotest()
 	elif Game.args.has("cardshot"):
 		_cardshot(int(Game.args.cardshot))
+	elif Game.args.has("storeshots"):
+		_storeshots()
+	elif Game.args.has("trailer"):
+		_trailer()
 	elif Game.args.has("level"):
 		start_level(int(Game.args.level) - 1)
 	else:
@@ -119,7 +123,7 @@ func _notification(what: int) -> void:
 		elif screen_name in ["levels", "modes", "blades", "settings"]:
 			show_title()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
-		if running and not paused and not Game.args.has("autotest"):
+		if running and not paused and not (Game.args.has("autotest") or Game.args.has("trailer") or Game.args.has("storeshots") or Game.args.has("cardshot")):
 			pause_game()
 
 
@@ -1182,9 +1186,10 @@ func _power_pill(kind: String) -> void:
 	UiKit.pop_in(p)
 
 
-func _bump(l: Control) -> void:
-	if l == null or not is_instance_valid(l):
+func _bump(o) -> void:
+	if o == null or not is_instance_valid(o):
 		return
+	var l: Control = o
 	l.pivot_offset = l.size * Vector2(0.0, 0.5)
 	var t := l.create_tween()
 	t.tween_property(l, "scale", Vector2(1.15, 1.15), 0.05)
@@ -1305,6 +1310,188 @@ func _play_level_bot(n: int, timeout: float, shot := "") -> bool:
 	arena.bot = false
 	await _wait(1.8)
 	return ended and result.get("win", false)
+
+
+# ------------------------------------------------------------------ store shots and trailer
+
+## Plays level n of a world in the background, HUD hidden (shots get captions in tools/play_store.py).
+func _stage_level(n: int, bot := true, wave := [2, 4]) -> void:
+	start_level(n)
+	if hud:
+		hud.visible = false
+	screen.visible = false
+	popup_layer.visible = false
+	arena.minimal = true
+	L.misses = 999
+	if L.goal != "boss":
+		L.goal = "showcase"   # never ends by itself
+	arena.bot = bot
+	_tap_start()
+	arena.cfg.wave = wave
+	arena.cfg.interval = 0.8
+	arena.cfg.bombs = 0.0
+	arena.spawn_t = 0.0
+
+
+## A row of fruit tossed up together and cut by one long swipe (a combo).
+func _stage_combo(kinds: Array, y := -0.3, shoot := "", delay := 0.14, pre := 0.0) -> void:
+	var was_bot := arena.bot
+	arena.bot = false
+	if pre > 0.0:
+		await _wait(pre)
+	var n := kinds.size()
+	var w := minf(arena.half_w * 0.75, 0.62 * n)
+	for i in n:
+		var f := arena.launch(kinds[i], 0.0)
+		var x := -w + 2.0 * w * i / maxf(1, n - 1)
+		f.position = Vector3(x, y - 3.0 + 0.35 * sin(i * 1.7), 0.2)
+		f.vel = Vector3(0, sqrt(2.0 * Arena.G * 3.0), 0)
+	await _wait(0.78)
+	var a0 := arena.cam.unproject_position(Vector3(-w - 1.2, y - 0.5, 0.2))
+	var a1 := arena.cam.unproject_position(Vector3(w + 1.2, y + 0.6, 0.2))
+	arena.ghost_path.clear()
+	arena.last_pos = a0
+	arena.trail.begin(a0)
+	for i in 14:
+		arena.swipe_to(a0.lerp(a1, (i + 1) / 14.0))
+		await _wait(0.012)
+	arena.trail.end()
+	if shoot != "":
+		await _wait(delay)
+		await _shot(shoot)
+	arena.bot = was_bot
+
+
+func _slice_now(kind: String, pos: Vector3, ang := 0.3) -> void:
+	var f := arena.launch(kind, 0.0)
+	f.position = pos
+	f.vel = Vector3(0, 0.3, 0)
+	await _wait(0.03)
+	var c := arena.cam.unproject_position(f.global_position)
+	var d := Vector2(170, 0).rotated(ang)
+	arena.last_pos = c - d
+	arena.trail.begin(c - d)
+	for i in 6:
+		arena.swipe_to((c - d).lerp(c + d, (i + 1) / 6.0))
+		await _wait(0.012)
+
+
+## Shot windows can be taller than the monitor: borderless + explicit size (Windows clamps titled windows).
+func _force_size() -> void:
+	if not Game.args.has("size"):
+		return
+	var p: PackedStringArray = String(Game.args.size).split("x")
+	get_window().borderless = true
+	get_window().position = Vector2i(0, 0)
+	get_window().size = Vector2i(int(p[0]), int(p[1]))
+	await _wait(0.5)
+	print("window ", get_window().size)
+
+
+func _storeshots() -> void:
+	get_window().always_on_top = true
+	await _force_size()
+	Game.save.tutorial = true
+	Game.args["unlock"] = true
+	show_title()
+	await _wait(3.2)
+	await _shot("s1_title")
+	await _stage_level(6)
+	await _wait(2.0)
+	await _stage_combo(["watermelon", "orange", "apple", "pear", "lemon"], 0.2, "s2_combo", 0.16, 1.3)
+	await _stage_level(3 * 20 + 4)
+	await _wait(1.5)
+	await _slice_now("frostberry", Vector3(0.6, 1.6, 0.3))
+	await _wait(0.4)
+	await _stage_combo(["kiwi", "grapefruit", "plum", "lime"], -0.4, "s3_freeze", 0.25, 0.6)
+	await _stage_level(4 * 20 + 19)
+	arena.cfg.bombs = 0.0
+	await _wait(6.5)
+	await _shot("s4_boss")
+	await _stage_level(2 * 20 + 7)
+	await _wait(2.5)
+	await _stage_combo(["dragonfruit", "strawberry", "peach", "mango", "plum"], 0.0, "s5_market", 0.2, 1.3)
+	await _stage_level(5 * 20 + 9)
+	await _wait(1.0)
+	await _slice_now("starfruit", Vector3(-0.8, 1.2, 0.3))
+	await _wait(1.3)
+	await _shot("s6_frenzy")
+	popup_layer.visible = true
+	show_levels(1)
+	await _wait(1.5)
+	await _shot("s7_levels")
+	show_blades()
+	await _wait(1.2)
+	await _shot("s8_blades")
+	get_tree().quit()
+
+
+## ~30 s scripted gameplay trailer. Record with Movie Maker (see AGENTS.md).
+func _trailer() -> void:
+	get_window().always_on_top = true   # an occluded window stops rendering and Movie Maker repeats frames
+	get_window().position = Vector2i(0, 0)
+	await _force_size()
+	Game.save.tutorial = true
+	Game.args["unlock"] = true
+	Sfx.locked_track = ""
+	Sfx.set_track("tropical")
+	Sfx.locked_track = "tropical"
+	Sfx.start_music()
+	# 0-5 s: bamboo garden, combos
+	await _stage_level(6, true, [3, 5])
+	await _wait(1.6)
+	await _stage_combo(["watermelon", "orange", "apple", "pear", "banana"], 0.1)
+	await _wait(1.4)
+	# 5-9 s: lagoon, star fruit frenzy
+	await _stage_level(20 + 6, true, [3, 5])
+	await _wait(0.6)
+	await _slice_now("starfruit", Vector3(-0.5, 1.0, 0.3))
+	await _wait(2.2)
+	# 9-13 s: lantern market combos
+	await _stage_level(2 * 20 + 7, true, [3, 5])
+	await _wait(1.0)
+	await _stage_combo(["dragonfruit", "strawberry", "peach", "mango", "plum", "apple"], 0.0)
+	await _wait(1.1)
+	await _stage_combo(["grapefruit", "plum", "strawberry", "peach"], 0.8)
+	await _wait(0.5)
+	# 13-17 s: frost peak, freeze
+	await _stage_level(3 * 20 + 4, true, [3, 5])
+	await _wait(0.7)
+	await _slice_now("frostberry", Vector3(0.6, 1.2, 0.3))
+	await _wait(0.9)
+	await _stage_combo(["kiwi", "lime", "grapefruit", "lemon"], -0.2)
+	await _wait(0.9)
+	# 17-23 s: volcano boss
+	await _stage_level(4 * 20 + 19, true, [2, 3])
+	arena.cfg.bombs = 0.0
+	if arena.boss:
+		arena.boss_hp = 15
+		arena.boss_max = 15
+	await _wait(5.5)
+	# 23-26.5 s: sky garden, pomegranate + combo
+	await _stage_level(5 * 20 + 9, true, [3, 5])
+	await _wait(0.4)
+	arena.bot = false
+	var pom := arena.launch("pomegranate", 0.0)
+	pom.position = Vector3(0.0, 0.8, 0.3)
+	pom.vel = Vector3(0, 0.3, 0)
+	await _wait(0.05)
+	for i in 12:
+		var c := arena.cam.unproject_position(pom.global_position) if is_instance_valid(pom) else Vector2(640, 300)
+		var d := Vector2(190, 0).rotated(i * 1.1)
+		arena.last_pos = c - d
+		arena.trail.begin(c - d)
+		for k in 4:
+			arena.swipe_to((c - d).lerp(c + d, (k + 1) / 4.0))
+			await _wait(0.012)
+		await _wait(0.07)
+	arena.bot = true
+	await _wait(1.0)
+	# 26.5-30 s: title with logo
+	popup_layer.visible = true
+	show_title()
+	await _wait(3.4)
+	get_tree().quit()
 
 
 ## Portal / store image: the bot plays a level of world W, HUD hidden; shots renders/card_*.png, then quit.

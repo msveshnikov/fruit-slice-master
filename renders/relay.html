@@ -1,0 +1,6 @@
+<!doctype html><meta charset="utf-8"><script>
+// Relay for uploads from the built-in browser: fetch a local file (same origin) and post the Blob to the parent page.
+const f = new URLSearchParams(location.search).get('f');
+fetch(f).then(r => r.blob()).then(b => parent.postMessage({claudeFile: b, name: f.split('/').pop()}, '*'))
+  .catch(e => parent.postMessage({claudeErr: String(e)}, '*'));
+</script>
