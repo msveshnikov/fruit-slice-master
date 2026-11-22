@@ -49,6 +49,7 @@ var demo := false         # title screen: a ghost blade slices everything
 var bot := false          # autotest: the ghost blade plays the level (avoids bombs)
 var bot_miss := 0.0       # chance the bot ignores a fruit (to test drops)
 var paused := false
+var quiet := false         # no score popups (portal / store shots)
 
 # blade / strokes
 var pressing := false
@@ -989,7 +990,7 @@ func _smoke(pos: Vector3) -> void:
 
 
 func _popup(text: String, pos: Vector3, color: Color, size := 1.0) -> void:
-	if demo:
+	if demo or quiet:
 		return
 	var l := Label3D.new()
 	l.text = text

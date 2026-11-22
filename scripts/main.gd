@@ -94,6 +94,8 @@ func _ready() -> void:
 	world_view = int(Game.save.get("last_world", 0))
 	if Game.args.has("autotest"):
 		_autotest()
+	elif Game.args.has("cardshot"):
+		_cardshot(int(Game.args.cardshot))
 	elif Game.args.has("level"):
 		start_level(int(Game.args.level) - 1)
 	else:
@@ -1303,6 +1305,28 @@ func _play_level_bot(n: int, timeout: float, shot := "") -> bool:
 	arena.bot = false
 	await _wait(1.8)
 	return ended and result.get("win", false)
+
+
+## Portal / store image: the bot plays a level of world W, HUD hidden; shots renders/card_*.png, then quit.
+func _cardshot(w: int) -> void:
+	start_level(w * Game.LEVELS_PER_WORLD + 6)
+	await _wait(0.5)
+	hud.visible = false
+	arena.quiet = true
+	arena.cam.position.z = 6.2
+	arena._on_resize()
+	arena.bot = true
+	_tap_start()
+	var k := 0
+	var t := 0.0
+	while k < 8 and t < 40.0:
+		await _wait(0.1)
+		t += 0.1
+		if t > 3.0 and arena.pieces.size() >= 4 and arena.splats.size() >= 3:
+			await _shot("card_%d" % k)
+			k += 1
+			await _wait(0.9)
+	get_tree().quit()
 
 
 func _autotest() -> void:
