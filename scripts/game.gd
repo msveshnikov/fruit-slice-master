@@ -53,6 +53,10 @@ var args := {}
 
 func _ready() -> void:
 	_parse_args()
+	# MSAA on the Compatibility renderer leaks native memory in mobile GL drivers (Mali: ~3.5 MB/s -> OOM after a
+	# few levels). project.godot already sets msaa_3d.mobile/web=0; this guards against an override slipping back.
+	if OS.has_feature("mobile") or OS.has_feature("web"):
+		get_viewport().msaa_3d = Viewport.MSAA_DISABLED
 	var f := FileAccess.open("res://assets/models/fruits.json", FileAccess.READ)
 	if f:
 		fruit_meta = JSON.parse_string(f.get_as_text())
@@ -69,6 +73,13 @@ func _ready() -> void:
 
 func _parse_args() -> void:
 	var a := OS.get_cmdline_user_args()
+	# phones: one-shot flags from user://cmdline.txt (adb shell run-as com.maxsoft.fruit ... files/cmdline.txt)
+	if FileAccess.file_exists("user://cmdline.txt"):
+		var cf := FileAccess.open("user://cmdline.txt", FileAccess.READ)
+		if cf:
+			a = PackedStringArray(cf.get_as_text().strip_edges().split(" ", false))
+			cf.close()
+		DirAccess.remove_absolute(ProjectSettings.globalize_path("user://cmdline.txt"))
 	var i := 0
 	while i < a.size():
 		var k: String = a[i]
@@ -205,7 +216,7 @@ func load_game() -> void:
 
 
 func save_game() -> void:
-	if args.has("autotest"):
+	if args.has("autotest") or args.has("soak"):
 		return
 	var f := FileAccess.open(SAVE_PATH, FileAccess.WRITE)
 	if f:

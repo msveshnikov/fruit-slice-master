@@ -52,6 +52,11 @@ Pass = last line of `renders/autotest.log` is `AUTOTEST DONE fails=0` (exit code
 The bot wins level 1 and the world-1 boss, a sliced bomb fails a level, each power-up fruit works, a 4-fruit swipe
 is a combo, Classic ends after 3 drops, pause works; screenshots of every screen and every world.
 Other flags: `-- --level N` (start level N), `-- --fresh`, `-- --lang en|ru`, `-- --unlock`.
+Memory soak: `-- --soak 6` (bot plays level after level for 6 min, counters every 20 s to `user://soak.log`; process
+memory from outside). On a phone put the flags in `user://cmdline.txt`:
+`adb shell "run-as com.maxsoft.fruit sh -c 'echo \"--soak 8\" > files/cmdline.txt'"` (read once, then deleted).
+MSAA must stay off on mobile/web (`msaa_3d.mobile/web=0` + guard in `Game._ready`): on the Compatibility renderer it
+leaks in Mali GL drivers and Android kills the game with out-of-memory after ~10 levels.
 
 ## Rebuild assets
 

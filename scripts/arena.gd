@@ -29,6 +29,7 @@ var trail: BladeTrail
 
 var meshes := {}          # kind -> {whole, top, bot}
 var tex := {}
+var _pmats := {}          # particle materials, shared (one per texture/blend) instead of one per burst
 var fruits: Array = []    # live Fruit nodes
 var pieces: Array = []    # flying halves
 var splats: Array = []
@@ -455,14 +456,7 @@ func _fuse_spark() -> CPUParticles3D:
 	p.lifetime = 0.35
 	var q := QuadMesh.new()
 	q.size = Vector2(0.12, 0.12)
-	var m := StandardMaterial3D.new()
-	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
-	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
-	m.blend_mode = BaseMaterial3D.BLEND_MODE_ADD
-	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
-	m.vertex_color_use_as_albedo = true
-	m.albedo_texture = tex.spark
-	q.material = m
+	q.material = _particle_mat(tex.spark, true)
 	p.mesh = q
 	p.direction = Vector3(0, 1, 0)
 	p.spread = 70
@@ -869,6 +863,9 @@ func _explode(f: Fruit) -> void:
 # ------------------------------------------------------------------ fx
 
 func _particle_mat(t: Texture2D, add := false) -> StandardMaterial3D:
+	var key := "%d_%s" % [t.get_instance_id(), add]
+	if _pmats.has(key):
+		return _pmats[key]
 	var m := StandardMaterial3D.new()
 	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
 	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
@@ -877,6 +874,7 @@ func _particle_mat(t: Texture2D, add := false) -> StandardMaterial3D:
 	m.billboard_mode = BaseMaterial3D.BILLBOARD_PARTICLES
 	m.vertex_color_use_as_albedo = true
 	m.albedo_texture = t
+	_pmats[key] = m
 	return m
 
 

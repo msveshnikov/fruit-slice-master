@@ -94,6 +94,8 @@ func _ready() -> void:
 	world_view = int(Game.save.get("last_world", 0))
 	if Game.args.has("autotest"):
 		_autotest()
+	elif Game.args.has("soak"):
+		_soak(float(Game.args.soak))
 	elif Game.args.has("cardshot"):
 		_cardshot(int(Game.args.cardshot))
 	elif Game.args.has("storeshots"):
@@ -123,7 +125,7 @@ func _notification(what: int) -> void:
 		elif screen_name in ["levels", "modes", "blades", "settings"]:
 			show_title()
 	elif what == NOTIFICATION_APPLICATION_FOCUS_OUT or what == NOTIFICATION_APPLICATION_PAUSED:
-		if running and not paused and not (Game.args.has("autotest") or Game.args.has("trailer") or Game.args.has("storeshots") or Game.args.has("cardshot")):
+		if running and not paused and not (Game.args.has("autotest") or Game.args.has("soak") or Game.args.has("trailer") or Game.args.has("storeshots") or Game.args.has("cardshot")):
 			pause_game()
 
 
@@ -1513,6 +1515,48 @@ func _cardshot(w: int) -> void:
 			await _shot("card_%d" % k)
 			k += 1
 			await _wait(0.9)
+	get_tree().quit()
+
+
+## Memory soak: the bot plays level after level for `minutes`, every 20 s a line of engine counters goes to
+## user://soak.log and stdout (process memory is measured from outside: Task Manager / adb dumpsys meminfo).
+func _soak(minutes: float) -> void:
+	Game.save.tutorial = false
+	var path := ProjectSettings.globalize_path("user://soak.log")
+	var lf := FileAccess.open("user://soak.log", FileAccess.WRITE)
+	var t0 := Time.get_ticks_msec()
+	var n := int(Game.args.get("level", 1)) - 1
+	var played := 0
+	var next_log := 0.0
+	print("SOAK log -> ", path)
+	while (Time.get_ticks_msec() - t0) / 60000.0 < minutes:
+		start_level(n)
+		await _wait(0.5)
+		arena.bot = true
+		arena.bot_miss = 0.0
+		_tap_start()
+		var t := 0.0
+		while not ended and t < 120.0:
+			await _wait(0.5)
+			t += 0.5
+			var el := (Time.get_ticks_msec() - t0) / 1000.0
+			if el >= next_log:
+				next_log += 20.0
+				var line := "t=%4ds lvl=%3d played=%3d static=%.1fMB video=%.1fMB objs=%d nodes=%d orphans=%d res=%d fps=%d" % [
+					int(el), n + 1, played, OS.get_static_memory_usage() / 1048576.0,
+					Performance.get_monitor(Performance.RENDER_VIDEO_MEM_USED) / 1048576.0,
+					int(Performance.get_monitor(Performance.OBJECT_COUNT)), int(Performance.get_monitor(Performance.OBJECT_NODE_COUNT)),
+					int(Performance.get_monitor(Performance.OBJECT_ORPHAN_NODE_COUNT)), int(Performance.get_monitor(Performance.OBJECT_RESOURCE_COUNT)),
+					int(Engine.get_frames_per_second())]
+				print("SOAK ", line)
+				if lf:
+					lf.store_line(line)
+					lf.flush()
+		arena.bot = false
+		played += 1
+		n = (n + 1) % Game.levels.size()
+		await _wait(1.0)
+	print("SOAK DONE played=%d" % played)
 	get_tree().quit()
 
 

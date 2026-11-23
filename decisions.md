@@ -32,3 +32,7 @@
   (×0.95 of the aspect, max 1.7), the 3D view simply gets wider.
 - **Autotest bot**: the same "ghost blade" that plays the title-screen demo can play levels (it avoids bombs
   by checking their current and predicted screen positions against each swipe segment).
+- **Out of memory on Android (2.0.2)**: the user's phone crashed with out-of-memory around level 10. A desktop soak
+  (18 levels, `--soak 6`) showed the game itself is clean: nodes 57–92, orphans 0, resources 322, process memory
+  flat at ~398 MB. Same cause as in Hot Bag: MSAA 2× on gl_compatibility leaks native memory in the Mali GL driver.
+  MSAA is now off on mobile and web (kept 2× on desktop); particle materials are shared instead of one per burst.
