@@ -15,7 +15,7 @@ Remake of the old HTML/Cordova game (kept untouched in `legacy_cordova/`); desig
 | Google Play | app «Fruit Slice Master», package `com.maxsoft.fruit`, Play Console app id 4975566050373032307 (dev 5957945224586801272). Listings en-US (default) + ru-RU «Мастер нарезки: фрукты 3D»; texts `store/listing.md`, graphics `store/play/` (all marked AI-made: ChatGPT art). 2.0.1 (20001) is live. |
 | Trailer | https://youtu.be/fqI1H9Syqaw (channel Manga TV, public), file `store/trailer_en.mp4`; also the Play promo video |
 | maxims.top portal card | source `C:\My-progs\Godot\maxims\index.html` + `img/fruit.jpg` (from `-- --cardshot 4` at `--resolution 1100x619`, frame `renders/card4/land_card_5.png`) |
-| Android APK | https://maxims.top/fruit/FruitSliceMaster.apk — package `com.maxsoft.fruit` (same as the Cordova app), signed with `~/.android/debug.keystore` via `.godot/export_credentials.cfg` (not in git) |
+| Android APK | https://maxims.top/fruit/FruitSliceMaster.apk — package `com.maxsoft.fruit` (same as the Cordova app). Site/GitHub APK = RELEASE build re-signed with the Play upload key `~/.android/fruit-cordova.keystore` (store and key passwords differ, see `fruit-cordova.txt`); never ship a debug-signed APK (Play Protect warns) |
 | Old Cordova PWA keystore | `~/.android/fruit-cordova.keystore` + `.txt` (never commit) |
 | Godot exe | `C:\Users\msves\OneDrive\Рабочий стол\Godot_v4.7.2-stable_win64.exe` |
 | Blender exe | `C:\Program Files\Blender Foundation\Blender 5.2\blender.exe` |
@@ -93,10 +93,18 @@ input from the assembled Blob.
 ```
 "$G" --headless --path . --export-release "Windows Desktop" build/windows/FruitSliceMaster.exe
 "$G" --headless --path . --export-release "Web" build/web/index.html
-"$G" --headless --path . --export-debug "Android" build/android/FruitSliceMaster.apk
+# APK for the site/GitHub: release export with any keystore, then re-sign with the upload key
+GODOT_ANDROID_KEYSTORE_RELEASE_PATH=~/.android/debug.keystore GODOT_ANDROID_KEYSTORE_RELEASE_USER=androiddebugkey GODOT_ANDROID_KEYSTORE_RELEASE_PASSWORD=android   "$G" --headless --path . --export-release "Android" build/android/FruitSliceMaster.apk
+"$LOCALAPPDATA/Android/Sdk/build-tools/36.1.0/apksigner.bat" sign --ks ~/.android/fruit-cordova.keystore --ks-key-alias <alias> --ks-pass env:KS_PASS --key-pass env:KEY_PASS build/android/FruitSliceMaster.apk
+# AAB for Google Play: preset "Android Play" (Gradle; template in android/, git-ignored, unzip android_source.zip from
+# the 4.7.2 export templates if missing), exported unsigned, then jarsigner (Godot can't pass two different passwords)
+"$G" --headless --path . --export-release "Android Play" build/google-play/FruitSliceMaster.aab
+jarsigner -sigalg SHA256withRSA -digestalg SHA-256 -keystore ~/.android/fruit-cordova.keystore -storepass:env KS_PASS -keypass:env KEY_PASS build/google-play/FruitSliceMaster.aab <alias>
 scp -o BatchMode=yes build/web/* build/android/FruitSliceMaster.apk ubuntu@severance.lol:/var/www/maxims/fruit/
 curl -sI https://maxims.top/fruit/index.pck
 ```
-Bump `version/code` in the Android preset for every APK that must install over an older one.
+Bump `version/code` in BOTH Android presets for every release. Play: Release > Production > Create release, upload the AAB
+(the production track keeps the old Cordova 17002 bundle for 32-bit phones — leave it), notes in `<en-US>`/`<ru-RU>` tags,
+Save, then Publishing overview > Send for review. The browser pane must be visible or Play Console doesn't render uploads.
 
 GitHub release (milestones): `"/c/Program Files/GitHub CLI/gh.exe" release create vX.Y.Z build/windows/FruitSliceMaster.exe build/android/FruitSliceMaster.apk --target master --title "Fruit Slice Master X.Y.Z" --notes-file notes.md` — the exe must stay a bare asset with exactly that name (the portal links to it).
